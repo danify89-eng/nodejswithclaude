@@ -16,6 +16,8 @@ A beginner guide — "Build a website with Claude Code + WebPros MCP" — served
 | `/register` | Create an account |
 | `/login` | Log in |
 | `/account` | Members-only page (must be logged in) |
+| `/snake` | Snake game with a top-10 leaderboard (logged-in players can save scores) |
+| `/api/scores` | `GET` leaderboard, `POST` save a score (logged in, CSRF header) |
 | `POST /logout` | Log out |
 | `/api/status` | JSON health check (status, Node version, database) |
 

@@ -7,6 +7,7 @@ const path = require('path');
 const db = require('./lib/db');
 const auth = require('./lib/auth');
 const views = require('./lib/views');
+const scores = require('./lib/scores');
 
 const PORT = process.env.PORT || 3000;
 const PRODUCTION = process.env.NODE_ENV === 'production';
@@ -18,6 +19,7 @@ const startedAt = new Date();
 
 const guide = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8')
   .replace('</style>', views.NAV_STYLE + '</style>');
+const snakeJs = fs.readFileSync(path.join(__dirname, 'public', 'snake.js'));
 
 // --- small HTTP helpers ---
 
@@ -56,7 +58,7 @@ function cookie(name, value, { maxAge, sameSite = 'Lax' } = {}) {
   return c;
 }
 
-function readForm(req) {
+function readBody(req) {
   return new Promise((resolve, reject) => {
     let size = 0;
     const chunks = [];
@@ -65,10 +67,16 @@ function readForm(req) {
       if (size > MAX_BODY) { reject(new Error('BODY_TOO_LARGE')); req.destroy(); return; }
       chunks.push(chunk);
     });
-    req.on('end', () => resolve(Object.fromEntries(new URLSearchParams(Buffer.concat(chunks).toString('utf8')))));
+    req.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
     req.on('error', reject);
   });
 }
+
+async function readForm(req) {
+  return Object.fromEntries(new URLSearchParams(await readBody(req)));
+}
+
+const json = (res, data, status = 200) => send(res, status, 'application/json; charset=utf-8', JSON.stringify(data));
 
 function clientIp(req) {
   // Behind cPanel's proxy the visitor's address is the first X-Forwarded-For entry.
@@ -129,6 +137,30 @@ async function handle(req, res) {
     const csrf = csrfFor(req, setCookies);
     const page = guide.replace('<body>', '<body>\n' + views.nav(user, csrf));
     return html(res, page, 200, { 'Set-Cookie': setCookies });
+  }
+
+  if (url === '/snake.js' && method === 'GET') {
+    return send(res, 200, 'text/javascript; charset=utf-8', snakeJs, { 'Cache-Control': 'no-cache' });
+  }
+
+  if (url === '/snake' && method === 'GET') {
+    const csrf = csrfFor(req, setCookies);
+    let best = 0;
+    if (user) best = await scores.personalBest(user.id);
+    return html(res, views.snakePage({ user, csrf, best }), 200, { 'Set-Cookie': setCookies });
+  }
+
+  if (url === '/api/scores') {
+    if (!dbUp) return json(res, { error: 'Scores are temporarily unavailable.' }, 503);
+    if (method === 'GET') return json(res, { scores: await scores.leaderboard() });
+    if (method !== 'POST') return json(res, { error: 'Method not allowed' }, 405);
+    if (!user) return json(res, { error: 'Please log in to save your score.' }, 401);
+    const token = parseCookies(req).csrf;
+    if (!token || token !== req.headers['x-csrf-token']) return json(res, { error: 'Please refresh the page and try again.' }, 403);
+    let body;
+    try { body = JSON.parse(await readBody(req)); } catch { return json(res, { error: 'Bad request' }, 400); }
+    const result = await scores.submit(user.id, body.score, body.durationMs);
+    return json(res, result, result.error ? 400 : 200);
   }
 
   const authRoutes = ['/login', '/register', '/account', '/logout'];
