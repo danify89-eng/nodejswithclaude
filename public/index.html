@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build a Website with Claude Code + WebPros MCP</title>
+<meta name="description" content="A beginner-friendly, step-by-step guide to building and publishing a website on your cPanel hosting using Claude Code and the WebPros MCP connection.">
+<style>
+:root{
+  --bg:#fbf8f6;--surface:#ffffff;--ink:#22201f;--muted:#6b6461;--line:#ece4df;
+  --accent:#9b2c50;--accent-soft:#f7e6ec;--code-bg:#2a2326;--code-ink:#f5ece8;
+  --ok:#2f7a4f;--ok-soft:#e5f3ea;--warn:#9a6411;--warn-soft:#fbf0dc;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#161314;--surface:#201c1d;--ink:#efe9e6;--muted:#a69d99;--line:#342d2f;
+    --accent:#f08aab;--accent-soft:#3a2129;--code-bg:#0f0d0e;--code-ink:#f5ece8;
+    --ok:#7fd3a0;--ok-soft:#1d2e24;--warn:#f0c070;--warn-soft:#33281a;
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--accent)}
+.wrap{max-width:820px;margin:0 auto;padding:0 16px}
+header.hero{padding:72px 0 48px;border-bottom:1px solid var(--line)}
+.tag{display:inline-block;font-size:.8rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);padding:4px 10px;border-radius:99px}
+h1{font-size:clamp(2rem,5vw,3rem);line-height:1.15;margin:16px 0 12px;letter-spacing:-.02em}
+.lead{font-size:1.15rem;color:var(--muted);margin:0 0 24px;max-width:640px}
+.facts{display:flex;flex-wrap:wrap;gap:10px;margin:0;padding:0;list-style:none}
+.facts li{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 14px;font-size:.92rem}
+nav.toc{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px 24px;margin:40px 0}
+nav.toc h2{font-size:1rem;margin:0 0 8px}
+nav.toc ol{margin:0;padding-left:20px}
+nav.toc li{margin:4px 0}
+section{padding:24px 0}
+h2{font-size:1.6rem;letter-spacing:-.01em;margin:0 0 12px}
+h3{font-size:1.15rem;margin:24px 0 8px}
+.step{display:grid;grid-template-columns:48px 1fr;gap:16px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px;margin:20px 0}
+.num{width:48px;height:48px;border-radius:50%;background:var(--accent);color:#fff;font-weight:700;font-size:1.2rem;display:flex;align-items:center;justify-content:center}
+@media (prefers-color-scheme: dark){.num{color:#1a1213}}
+.step h2{font-size:1.35rem;margin-top:8px}
+.step p:last-child{margin-bottom:0}
+pre,code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.9em}
+code{background:var(--accent-soft);padding:1px 6px;border-radius:5px}
+pre{background:var(--code-bg);color:var(--code-ink);padding:14px 16px;border-radius:10px;overflow-x:auto;position:relative;margin:12px 0;white-space:pre-wrap;word-break:break-word}
+pre code{background:none;padding:0;color:inherit}
+.copy{position:absolute;top:8px;right:8px;font:600 .75rem system-ui,sans-serif;background:#ffffff1f;color:var(--code-ink);border:1px solid #ffffff33;border-radius:6px;padding:4px 8px;cursor:pointer}
+.copy:hover{background:#ffffff33}
+.prompt{border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:12px 0;font-style:italic}
+.note{border-radius:12px;padding:14px 18px;margin:16px 0;font-size:.97rem}
+.note.ok{background:var(--ok-soft);border:1px solid color-mix(in srgb,var(--ok) 30%,transparent)}
+.note.warn{background:var(--warn-soft);border:1px solid color-mix(in srgb,var(--warn) 30%,transparent)}
+.note strong{display:block;margin-bottom:2px}
+.note.ok strong{color:var(--ok)}
+.note.warn strong{color:var(--warn)}
+ul.check{list-style:none;padding:0}
+ul.check li{padding-left:30px;position:relative;margin:8px 0}
+ul.check li::before{content:"✓";position:absolute;left:0;top:0;width:22px;height:22px;border-radius:50%;background:var(--ok-soft);color:var(--ok);font-weight:700;font-size:.8rem;display:flex;align-items:center;justify-content:center}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.95rem}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.85rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.table-wrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+details{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin:10px 0}
+summary{cursor:pointer;font-weight:600}
+details p{margin:10px 0 0}
+footer{border-top:1px solid var(--line);margin-top:48px;padding:32px 0 48px;color:var(--muted);font-size:.9rem}
+.live{display:inline-block;margin-top:4px;padding:4px 12px;border-radius:99px;background:var(--surface);border:1px solid var(--line);font-size:.85rem}
+.live.on{color:var(--ok);border-color:var(--ok)}
+@media (max-width:560px){
+  .step{grid-template-columns:1fr;padding:20px}
+  .num{width:40px;height:40px;font-size:1rem}
+  header.hero{padding:48px 0 32px}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="tag">Beginner guide</span>
+    <h1>Build your website by just <em>asking</em>.</h1>
+    <p class="lead">This page shows how to use <strong>Claude Code</strong> with the <strong>WebPros MCP</strong> connection to create a website and put it live on your cPanel hosting. You type plain-English requests, and Claude does the technical work for you.</p>
+    <ul class="facts">
+      <li>⏱ About 20 minutes</li>
+      <li>💻 No coding needed</li>
+      <li>🌐 Works with cPanel hosting</li>
+    </ul>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <nav class="toc" aria-label="Contents">
+    <h2>What you'll do</h2>
+    <ol>
+      <li><a href="#need">Check you have what you need</a></li>
+      <li><a href="#s1">Open Claude Code</a></li>
+      <li><a href="#s2">Sign in to WebPros MCP</a></li>
+      <li><a href="#s3">Check the connection</a></li>
+      <li><a href="#s4">Make a folder for your site</a></li>
+      <li><a href="#s5">Ask Claude to build the website</a></li>
+      <li><a href="#s6">Open your live website</a></li>
+      <li><a href="#s7">Make changes any time</a></li>
+      <li><a href="#limits">Good to know (limits)</a></li>
+      <li><a href="#faq">Questions</a></li>
+    </ol>
+  </nav>
+
+  <section id="need">
+    <h2>Before you start</h2>
+    <p>You need these four things:</p>
+    <ul class="check">
+      <li><strong>A cPanel hosting account</strong> with a domain, such as <code>yourshop.com</code>.</li>
+      <li><strong>A Claude account</strong> that can use Claude Code.</li>
+      <li><strong>Claude Code</strong>, either the VS Code extension or the terminal app.</li>
+      <li><strong>The WebPros MCP server</strong> added to Claude Code. Your hosting provider or WebPros gives you the setup details.</li>
+    </ul>
+    <div class="note ok">
+      <strong>What is "MCP"?</strong>
+      MCP is a safe bridge that lets Claude talk to other services. The WebPros MCP lets Claude look inside your cPanel hosting and work on it: it can read and save files, check your domains, and more. It only works after you sign in and give permission.
+    </div>
+  </section>
+
+  <div class="step" id="s1">
+    <div class="num">1</div>
+    <div>
+      <h2>Open Claude Code</h2>
+      <p>Start Claude Code the way you normally do:</p>
+      <ul>
+        <li><strong>VS Code:</strong> click the Claude icon in the sidebar to open the chat panel.</li>
+        <li><strong>Terminal:</strong> open a terminal and type:</li>
+      </ul>
+      <pre><code>claude</code></pre>
+    </div>
+  </div>
+
+  <div class="step" id="s2">
+    <div class="num">2</div>
+    <div>
+      <h2>Sign in to WebPros MCP</h2>
+      <p>Claude can't use your hosting until you sign in. In the Claude Code chat, type:</p>
+      <pre><code>/mcp</code></pre>
+      <p>A list of connections appears. Choose <strong>webpros-mcp</strong>, pick <strong>Authenticate</strong>, and finish signing in in the browser window that opens.</p>
+      <div class="note warn">
+        <strong>Never paste passwords into the chat</strong>
+        You sign in on the official login page in your browser. Claude never needs your cPanel password, codes or tokens typed into the chat.
+      </div>
+    </div>
+  </div>
+
+  <div class="step" id="s3">
+    <div class="num">3</div>
+    <div>
+      <h2>Check the connection</h2>
+      <p>Ask Claude in plain words:</p>
+      <div class="prompt">"Am I connected to WebPros MCP?"</div>
+      <p>If it works, Claude replies with the name of your hosting server. For example:</p>
+      <pre><code>Yes, you're connected. It can reach one cPanel server:
+vmi3118027.contaboserver.net</code></pre>
+      <p>If Claude says the server <em>needs authorization</em>, go back to Step 2.</p>
+    </div>
+  </div>
+
+  <div class="step" id="s4">
+    <div class="num">4</div>
+    <div>
+      <h2>Make a folder for your site</h2>
+      <p>Every folder you create inside <code>public_html</code> becomes a web address. For example, a folder named <code>shop</code> becomes <code>yourdomain.com/shop/</code>.</p>
+      <div class="note warn">
+        <strong>Create the folder yourself (about 30 seconds)</strong>
+        The WebPros MCP can read and save files, but it has no "create folder" option. Make the folder by hand:
+      </div>
+      <ol>
+        <li>Log into <strong>cPanel</strong> and open <strong>File Manager</strong>.</li>
+        <li>Open the <strong>public_html</strong> folder.</li>
+        <li>Click <strong>+ Folder</strong>, type a short name like <code>shop</code>, and click <strong>Create</strong>.</li>
+      </ol>
+      <p>Tip: use lowercase letters with no spaces. The name is only part of the web address. It doesn't change how the site works.</p>
+    </div>
+  </div>
+
+  <div class="step" id="s5">
+    <div class="num">5</div>
+    <div>
+      <h2>Ask Claude to build the website</h2>
+      <p>Tell Claude what you want, where to put it, and who it's for. The more you describe, the better the result. Some example requests:</p>
+      <div class="prompt">"Build me a website in https://yourdomain.com/shop/. It's a small online shop selling handmade candles. I want a home page, a product list with prices, and a contact section. Use warm colours."</div>
+      <div class="prompt">"Make a one-page website in https://yourdomain.com/portfolio/ that shows my photography, with a short 'about me' and my email."</div>
+      <div class="prompt">"Create a 'Coming Soon' page in https://yourdomain.com/launch/ with my business name and a countdown to 1 December."</div>
+      <p>Claude will then:</p>
+      <ol>
+        <li>Find your domain and the folder you made.</li>
+        <li>Check that nothing already in the folder gets overwritten.</li>
+        <li>Write the website files and save them straight onto your hosting.</li>
+        <li>Give you the link to open.</li>
+      </ol>
+      <div class="note ok">
+        <strong>Claude checks with you first</strong>
+        Before anything risky, like replacing an existing file, Claude stops and asks you.
+      </div>
+    </div>
+  </div>
+
+  <div class="step" id="s6">
+    <div class="num">6</div>
+    <div>
+      <h2>Open your live website</h2>
+      <p>Open the link in any browser, on your computer or your phone. Your site is live, and anyone with the link can see it.</p>
+      <p>If you see an old version, refresh the page. On a computer, press <code>Ctrl + F5</code> (Windows) or <code>Cmd + Shift + R</code> (Mac).</p>
+    </div>
+  </div>
+
+  <div class="step" id="s7">
+    <div class="num">7</div>
+    <div>
+      <h2>Make changes any time</h2>
+      <p>You don't need to edit any code. Just ask:</p>
+      <div class="prompt">"On my shop page, change the main colour to dark green and add a new product: Lavender Candle, $18."</div>
+      <div class="prompt">"Make the text bigger on phones."</div>
+      <div class="prompt">"Add my Instagram link at the bottom."</div>
+      <p>Claude reads the current file from your hosting, makes the change, and saves it back.</p>
+    </div>
+  </div>
+
+  <section id="limits">
+    <h2>Good to know</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Topic</th><th>What happens</th></tr></thead>
+        <tbody>
+          <tr><td><strong>New folders</strong></td><td>Claude can't create them through the MCP. Make them in cPanel File Manager (Step 4).</td></tr>
+          <tr><td><strong>Big files</strong> (over 64 KB, like large photos)</td><td>These go straight to your server over a secure connection. Claude uses a temporary access key for this and deletes it as soon as the upload finishes.</td></tr>
+          <tr><td><strong>What kind of website</strong></td><td>Normal cPanel hosting runs <strong>HTML, CSS, JavaScript and PHP</strong> with a MySQL database. That covers shops, blogs, portfolios and contact forms. It can also run <strong>Node.js apps</strong> (like this page) once your host installs Node.js and turns on <strong>Application Manager</strong> in cPanel.</td></tr>
+          <tr><td><strong>Your other files</strong></td><td>Claude lists what's in a folder before writing, so your existing site isn't overwritten without asking.</td></tr>
+          <tr><td><strong>Safety</strong></td><td>Claude only gets access after you sign in with <code>/mcp</code>. You can sign out at any time from the same menu.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="faq">
+    <h2>Questions</h2>
+    <details>
+      <summary>Do I need to know how to code?</summary>
+      <p>No. You describe what you want in normal words, and Claude writes the code and puts it on your hosting.</p>
+    </details>
+    <details>
+      <summary>Claude says "webpros-mcp needs authorization". What do I do?</summary>
+      <p>Type <code>/mcp</code> in Claude Code, select <strong>webpros-mcp</strong>, and sign in again in your browser. Then ask "Am I connected now?"</p>
+    </details>
+    <details>
+      <summary>Can I have more than one website on one domain?</summary>
+      <p>Yes. Each folder inside <code>public_html</code> is its own site, for example <code>/shop/</code>, <code>/blog/</code> and <code>/launch/</code>.</p>
+    </details>
+    <details>
+      <summary>What if I don't like the result?</summary>
+      <p>Tell Claude what to change, such as "make it simpler", "use blue instead" or "remove the prices". You can keep asking until it looks right.</p>
+    </details>
+    <details>
+      <summary>Can Claude delete my files?</summary>
+      <p>Claude won't delete or replace your files without asking you first. A backup is still a good idea: in cPanel, use <strong>Backup</strong> to download a copy of your site.</p>
+    </details>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>This page is a <strong>Node.js app</strong>, built with Claude Code and deployed through the WebPros MCP to cPanel Application Manager.</p>
+    <p id="live" class="live">Checking server status…</p>
+  </div>
+</footer>
+
+<script>
+fetch("api/status").then(function (r) { return r.json(); }).then(function (s) {
+  var el = document.getElementById("live");
+  el.textContent = "25CF Live on Node.js " + s.node + " 00B7 " + s.env + " mode";
+  el.className = "live on";
+}).catch(function () { document.getElementById("live").textContent = "Status unavailable"; });
+
+document.querySelectorAll('pre').forEach(function (pre) {
+  var btn = document.createElement('button');
+  btn.className = 'copy';
+  btn.type = 'button';
+  btn.textContent = 'Copy';
+  btn.addEventListener('click', function () {
+    var text = pre.querySelector('code').innerText;
+    navigator.clipboard.writeText(text).then(function () {
+      btn.textContent = 'Copied!';
+      setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
+    });
+  });
+  pre.appendChild(btn);
+});
+</script>
+</body>
+</html>

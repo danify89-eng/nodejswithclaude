@@ -1,0 +1,14 @@
+{
+  "name": "nodejswithclaude",
+  "version": "1.0.0",
+  "description": "Beginner guide: build a website with Claude Code + WebPros MCP, served by Node.js.",
+  "main": "app.js",
+  "private": true,
+  "scripts": {
+    "start": "node app.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED"
+}
